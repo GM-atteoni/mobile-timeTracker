@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TextInput, FlatList, SafeAreaView, Text } from 'react-native';
+import { View, StyleSheet, TextInput, FlatList, SafeAreaView, Text, Alert } from 'react-native';
 import { connect } from 'react-redux';
 import Headercomponent from '../shared/header';
 import axios from 'axios';
@@ -35,7 +35,7 @@ class ConsumerHomeComponent extends Component {
             this.setState({arrTipos: res.data})
         })
         .catch(err => {
-            alert('Houve um erro inesperado! Contate um administrador do sistema.')
+            Alert.alert('Ops! Algo deu errado', 'Contate um administrador do sistema.')
         })
     }
 
@@ -45,7 +45,7 @@ class ConsumerHomeComponent extends Component {
             this.setState({arrTipos: res.data})
         })
         .catch(err => {
-            alert('Houve um erro inesperado! Contate um administrador do sistema.')
+            Alert.alert('Ops! Algo deu errado', 'Contate um administrador do sistema.')
         })
     }
 

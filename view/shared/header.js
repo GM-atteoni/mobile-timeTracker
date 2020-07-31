@@ -71,11 +71,11 @@ const styles = StyleSheet.create({
     },
     titulo: {
         color: '#FF473A',
-        fontSize: 20
+        fontSize: 24
     },
     titulo2: {
         color: '#FFF',
-        fontSize: 20
+        fontSize: 24
     },
     logo: {
         fontSize: 12,
