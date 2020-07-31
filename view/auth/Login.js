@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ImageBackground, TouchableHighlight, TextInput } from 'react-native';
+import { StyleSheet, Text, View, ImageBackground, TouchableHighlight, TextInput, Alert, Image } from 'react-native';
 import React, { useState, Component } from 'react';
 import axios from 'axios';
 import {connect} from 'react-redux'
@@ -25,7 +25,7 @@ class LoginComponent extends React.Component {
 
     clickLogin = () => {
       if(this.state.login == '' || this.state.login == undefined || this.state.senha == '' || this.state.senha == undefined){
-        alert('Preencha os campos!');
+        Alert.alert('Ops! Algo deu errado', 'Preencha os campos')
       }else{
         this.setState({
           loading: true
@@ -52,7 +52,7 @@ class LoginComponent extends React.Component {
                 login: '',
                 senha: '',
               })
-              alert('E-mail ou Senha inválidos. Caso não possua cadastro, cadastre-se abaixo');
+              Alert.alert('Ops! Algo deu errado', 'E-mail ou Senha inválidos. Caso não possua cadastro, cadastre-se abaixo');
             }
           }).catch(err => {
             this.setState({
@@ -60,7 +60,7 @@ class LoginComponent extends React.Component {
                 login: '',
                 senha: '',
             })
-            alert('Desculpe, ocorreu um erro inesperado. Tente novamente mais tarde.');
+            Alert.alert('Ops! Algo deu errado', 'Desculpe, ocorreu um erro inesperado. Tente novamente mais tarde.');
           })
         }else{
           axios.post(`${url.prod}/auth/estabelecimento/login`, { 
@@ -81,7 +81,7 @@ class LoginComponent extends React.Component {
                 login: '',
                 senha: '',
               })
-              alert('E-mail ou Senha inválidos. Caso não possua cadastro, cadastre-se abaixo');
+              Alert.alert('Ops! Algo deu errado', 'E-mail ou Senha inválidos. Caso não possua cadastro, cadastre-se abaixo');
             }
           }).catch(err => {
             this.setState({
@@ -89,7 +89,7 @@ class LoginComponent extends React.Component {
                 login: '',
                 senha: '',
             })
-            alert('Desculpe, ocorreu um erro inesperado. Tente novamente mais tarde.');
+            Alert.alert('Ops! Algo deu errado', 'Desculpe, ocorreu um erro inesperado. Tente novamente mais tarde.');
           })
         }
       }
@@ -118,7 +118,10 @@ class LoginComponent extends React.Component {
           <View style={styles.login}> 
             <Text style={styles.LoginText}>Seus horários na palma da mão</Text>
             <TouchableHighlight underlayColor="#ff5448" onPress={this.clickSwitch} style={styles.botaoSwitch}> 
-              <Text style={{fontSize: 20}}>{this.state.user}</Text>
+              <View style={styles.botaoSwitchView}>
+                <Text style={{fontSize: 20, color: '#fff'}}>{this.state.user}</Text>
+                <Image source={require('../../assets/change.png')} style={styles.icone}></Image>
+              </View>
             </TouchableHighlight>
             <View style={styles.loginInputView} >
               <TextInput style={styles.loginInput} placeholderTextColor="black" placeholder="Login" onChangeText={text => this.setState({login: text})} value={this.state.login}></TextInput>
@@ -204,6 +207,15 @@ class LoginComponent extends React.Component {
       alignItems: "center",
       justifyContent: "center"
     },
+    botaoSwitchView:{
+      backgroundColor: "#ff5448",
+      borderRadius: 10,
+      height: "100%",
+      width: "100%",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-around"
+    },
     botaoCadastrar:{
       position: 'absolute',
       top: '8%',
@@ -219,6 +231,10 @@ class LoginComponent extends React.Component {
     botaoCadastrarText:{
       color: "#fff",
       fontSize: 16
+    },
+    icone:{
+      height: 24,
+      width: 34
     }
   });
 
