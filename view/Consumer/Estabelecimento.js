@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Image, Text, SafeAreaView, ScrollView, FlatList, TouchableHighlight, Modal } from 'react-native';
+import { View, StyleSheet, Image, Text, SafeAreaView, ScrollView, FlatList, TouchableHighlight, Modal, Alert } from 'react-native';
 import { connect } from 'react-redux';
 import Headercomponent from '../shared/header';
 import axios from 'axios';
@@ -28,11 +28,13 @@ class EstabelecimentoInfos extends Component {
     }
 
     render(){
+        console.log(this.props.selectedEstab)
         return(
             <View style={styles.container}>
                 <Headercomponent navigation={this.props.navigation} init={false} titulo={this.props.selectedType.nome} ></Headercomponent>  
                 <Image source={{uri: this.props.selectedType.url}} style={styles.estabImage}/>
                 <Text style={styles.nomeTxt}>{this.props.selectedEstab.nome}</Text>
+                <Text style={{fontSize: 20, color: 'black'}}>{this.props.selectedEstab.endereco}</Text>
                 <ScrollView style={styles.areaDesc}>
                     <Text style={styles.descTxt}>{this.props.selectedEstab.descricao}</Text>
                 </ScrollView>

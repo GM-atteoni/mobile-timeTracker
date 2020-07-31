@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { StyleSheet, View, Text, TouchableHighlight, Image, TouchableOpacity } from "react-native";
 import Stepper from "./Steppercadastro";
 import { connect } from 'react-redux';
+import Loader from '../shared/loading';
 
 class CadastroComponent extends Component{
 
@@ -9,7 +10,16 @@ class CadastroComponent extends Component{
         super(props);
         this.state = {
             pagina: 0,
-            finaliza: ''
+            finaliza: '',
+            loading: false
+        }
+    }
+
+    componentWillUnmount(){
+        this.state = {
+            pagina: 0,
+            finaliza: '',
+            loading: false
         }
     }
 
@@ -52,13 +62,22 @@ class CadastroComponent extends Component{
     finalizarCadastro = () => {
         if(this.props.selectedTypeCadastro == 'Estabelecimento'){
             this.setState({
-                finaliza: 'Estabelecimento'
+                finaliza: 'Estabelecimento',
+                loading: true
             })
         }else{
             this.setState({
-                finaliza: 'Consumidor'
+                finaliza: 'Consumidor',
+                loading: true
             })
         }
+    }
+
+    resetaFinalizaFlag = () => {
+        this.setState({
+            finaliza: '',
+            loading: false
+        })
     }
 
     renderizarBotao = () => {
@@ -80,11 +99,12 @@ class CadastroComponent extends Component{
     render(){
         return (
              <View style={styles.container}>
+                 <Loader loading={this.state.loading} />
                  <Text style={styles.textCad}>Cadastre-se</Text>
                     <TouchableOpacity style={styles.back} onPress={this.back}>
                         <Image source={require('../../assets/back.png')} style={{height: 30, width: 30}}></Image>
                     </TouchableOpacity>
-                <Stepper finaliza={this.state.finaliza} ref={this.stepperRef} navigation={this.props.navigation} pagina={this.state.pagina}></Stepper>
+                <Stepper resetaFinalizaFlag={this.resetaFinalizaFlag} finaliza={this.state.finaliza} ref={this.stepperRef} navigation={this.props.navigation} pagina={this.state.pagina}></Stepper>
                 {
                     this.renderizarBotao()
                 }

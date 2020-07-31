@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, TextInput, SafeAreaView, TouchableHighlight, Image, TouchableOpacity, ScrollView } from "react-native";
+import { StyleSheet, View, Text, TextInput, SafeAreaView, TouchableHighlight, Image, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { connect } from 'react-redux';
 import { SelectTypeCadastro } from "../../redux/actions/auth";
 import axios from 'axios';
@@ -60,7 +60,7 @@ class Stepper extends Component{
 
     adicionarServico = () => {
         if(this.state.servico == '' || this.state.preco == ''){
-            alert('Preencha os campos com o nome do serviço e o valor');
+            Alert.alert('Ops! Algo deu errado', 'Preencha os campos com o nome do serviço e o valor')
             return false;
         }
         this.state.arrServico.push({
@@ -116,51 +116,71 @@ class Stepper extends Component{
         if(tipo.includes('|')){
             let newTipo = tipo.split('|')[0]
             this.state.arrTipos.splice(index, 1, newTipo);
+            this.state.arrSelectedTipos.splice(this.state.arrSelectedTipos.indexOf(tipo), 1)
             this.setState({
-                arrTipos: this.state.arrTipos
+                arrTipos: this.state.arrTipos,
+                arrSelectedTipos: this.state.arrSelectedTipos
             })
         }else{
             let newTipo = tipo + '|';
             this.state.arrTipos.splice(index, 1, newTipo);
+            let newArr = this.state.arrSelectedTipos.concat(tipo)
             this.setState({
-                arrTipos: this.state.arrTipos
+                arrTipos: this.state.arrTipos,
+                arrSelectedTipos: newArr
             })
         }
     }
 
     componentDidUpdate(){
         if(this.props.finaliza == 'Estabelecimento'){
-            
-            axios.post(`${url.prod}/auth/cadastro/estabelecimento`, { 
-                "email": this.state.login, 
-                "pswd": this.state.senha
-              }).then(res => {
-                alert('Cadastro realizado com sucesso')
-                this.props.navigation.navigate('Login')
-              }).catch(err => {
-                alert('Erro ao cadastrar. Tente novamente mais tarde')
-                this.props.navigation.navigate('Login')
-              })
-            
+            if(this.state.nome == '' || this.state.email == '' || this.state.pswd == '' || this.state.nrDocumento == '' || this.state.endereco == ''
+            || this.state.descricao == '', this.state.arrServico.length < 1 || this.state.arrSelectedTipos.length < 1 || this.state.inicioExp == '' || this.state.fimExp == '' || this.state.duracaoExp == ''){
+                Alert.alert('Ops! Algo deu errado', 'Preencha todos os campos')
+                this.props.resetaFinalizaFlag();
+            }else{
+                axios.post(`${url.prod}/auth/cadastro/estabelecimento`, {
+                    "nome": this.state.nome, 
+                    "arrTipo": this.state.arrSelectedTipos,
+                    "endereco": this.state.endereco, 
+                    "nrDocumento": this.state.nrDocumento,
+                    "email": this.state.email,
+                    "pswd": this.state.pswd, 
+                    "descricao": this.state.descricao,
+                    "valores":  this.state.arrServico,
+                    "configuracoes": {
+                        "inicio": this.state.inicioExp,
+                        "fim": this.state.fimExp,
+                        "duracao": this.state.duracaoExp
+                    }
+                    }).then(res => {
+                    Alert.alert('Sucesso', 'Cadastro realizado com sucesso')
+                    this.props.navigation.navigate('Login')
+                  }).catch(err => {
+                    Alert.alert('Erro ao cadastrar', 'Tente novamente mais tarde')
+                    this.props.navigation.navigate('Login')
+                  })
+            }
         }else if (this.props.finaliza == 'Consumidor'){
             if(this.state.nomeCliente == '' || this.state.emailCliente == '' || this.state.nrDocumentoCliente == '' || this.state.pswdCliente == ''){
-                alert('Preencha todos os campos')
-                return false;
+                Alert.alert('Ops! Algo deu errado', 'Preencha todos os campos')
+                this.props.resetaFinalizaFlag();
+            }else{
+                axios.post(`${url.prod}/auth/cadastro/consumidor`, { 
+                    "nome": this.state.nomeCliente,
+                    "email": this.state.emailCliente,
+                    "cpf": this.state.nrDocumentoCliente,
+                    "pswd": this.state.pswdCliente
+                  }).then(res => {
+                    Alert.alert('Sucesso', 'Cadastro realizado com sucesso')
+                    this.props.navigation.navigate('Login')
+                  }).catch(err => {
+                    Alert.alert('Erro ao cadastrar', 'Tente novamente mais tarde')
+                    this.props.navigation.navigate('Login')
+                  })
             }
-            axios.post(`${url.prod}/auth/cadastro/consumidor`, { 
-                "nome": this.state.nomeCliente,
-                "email": this.state.emailCliente,
-                "cpf": this.state.nrDocumentoCliente,
-                "pswd": this.state.pswdCliente
-              }).then(res => {
-                alert('Cadastro realizado com sucesso')
-                this.props.navigation.navigate('Login')
-              }).catch(err => {
-                alert('Erro ao cadastrar. Tente novamente mais tarde')
-                this.props.navigation.navigate('Login')
-              })
         }else{
-
+            console.log(this.props.finaliza)
         }
     }
 
@@ -190,6 +210,7 @@ class Stepper extends Component{
         }else if(this.props.pagina == 1){
             return (
                 <View style={styles.CadInputView} >
+                    <Text style={{color: '#FFF', fontSize: 20, textAlign: 'center'}}>Informações</Text>
                     <TextInput style={styles.CadInput} placeholderTextColor="black" placeholder="Nome do Estabelecimento" onChangeText={text => this.setState({nome: text})} value={this.state.nome}></TextInput>
                     <TextInput style={styles.CadInput} placeholderTextColor="black" placeholder="Nome de usuário" onChangeText={text => this.setState({email: text})} value={this.state.email}></TextInput>
                     <TextInput secureTextEntry={true} style={styles.CadInput} placeholderTextColor="black" placeholder="Senha" onChangeText={text => this.setState({pswd: text})} value={this.state.pswd}></TextInput>
@@ -200,6 +221,7 @@ class Stepper extends Component{
         }else if(this.props.pagina == 2){
             return (
                 <View style={styles.CadInputDescView} >
+                    <Text style={{color: '#FFF', fontSize: 20, textAlign: 'center', position: 'absolute', top: '5%'}}>Descrição</Text>
                     <Text style={{color: '#FFF', fontSize: 12, textAlign: 'center'}}>Por favor, descreva seu estabelecimento. Essa descrição será disponibilizada aos seus clientes.</Text>
                     <TextInput style={styles.CadInputDesc} multiline={true} placeholderTextColor="black" onChangeText={text => this.setState({descricao: text})} value={this.state.descricao}></TextInput>
                 </View>
@@ -240,8 +262,9 @@ class Stepper extends Component{
         }else if(this.props.pagina == 6){
             return (
                 <View style={styles.CadInputView} >
+                    <Text style={{color: '#FFF', fontSize: 20, textAlign: 'center'}}>Informações Pessoais</Text>
                     <TextInput style={styles.CadInput} placeholderTextColor="black" placeholder="Nome" onChangeText={text => this.setState({nomeCliente: text})} value={this.state.nomeCliente}></TextInput>
-                    <TextInput style={styles.CadInput} placeholderTextColor="black" placeholder="Email" onChangeText={text => this.setState({emailCliente: text})} value={this.state.emailCliente}></TextInput>
+                    <TextInput style={styles.CadInput} placeholderTextColor="black" placeholder="Nome de usuário" onChangeText={text => this.setState({emailCliente: text})} value={this.state.emailCliente}></TextInput>
                     <TextInput secureTextEntry={true} style={styles.CadInput} placeholderTextColor="black" placeholder="Senha" onChangeText={text => this.setState({pswdCliente: text})} value={this.state.pswdCliente}></TextInput>
                     <TextInput style={styles.CadInput} keyboardType='numeric' placeholderTextColor="black" placeholder="CNPJ/CPF" onChangeText={text => this.setState({nrDocumentoCliente: text})} value={this.state.nrDocumentoCliente}></TextInput>
                 </View>
@@ -249,6 +272,7 @@ class Stepper extends Component{
         }else if(this.props.pagina == 4){
             return (
                 <SafeAreaView style={styles.safeCadTipos}>
+                    <Text style={{color: '#FFF', fontSize: 20, textAlign: 'center'}}>Tipos de serviços prestados</Text>
                     <ScrollView contentContainerStyle={styles.flexScroll} style={styles.scrollInputed}>
                        {
                            this.state.arrTipos.map(
@@ -278,6 +302,7 @@ class Stepper extends Component{
         }else{
             return (
                 <View style={styles.CadInputView} >
+                    <Text style={{color: '#FFF', fontSize: 20, textAlign: 'center'}}>Informações sobre o estabelecimento</Text>
                     <TextInput style={styles.inputConfigs} keyboardType='numeric' placeholderTextColor="black" placeholder="Início do expediente" onChangeText={text => this.setState({inicioExp: text})} value={this.state.inicioExp}></TextInput>
                     <TextInput style={styles.inputConfigs} keyboardType='numeric' placeholderTextColor="black" placeholder="Fim do expediente" onChangeText={text => this.setState({fimExp: text})} value={this.state.fimExp}></TextInput>
                     <TextInput style={styles.inputConfigs} keyboardType='numeric' placeholderTextColor="black" placeholder="Duração do expediente" onChangeText={text => this.setState({duracaoExp: text})} value={this.state.duracaoExp}></TextInput>
@@ -338,21 +363,24 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         backgroundColor: "#fff",
         width: "90%",
-        height: '60%'
+        height: '60%',
+        fontSize: 18,
+        paddingHorizontal: 8
       },
       safeCadInputed: {
         flex: 1,
-        width: '100%',
+        width: '95%',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: '5%',
-        borderWidth: 2,
+        backgroundColor: 'rgba(97, 97, 97, 0.2)',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20
+        borderBottomRightRadius: 20,
+        paddingHorizontal: 5
       },
       safeCadTipos: {
         flex: 1,
@@ -370,7 +398,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
       },    
       scrollInputed:{
-          width: '90%'
+          width: '100%'
       },
       safeCadInputs:{
         width: '100%',
@@ -413,7 +441,7 @@ const styles = StyleSheet.create({
           width: '90%'
       },
       servicoTagView: {
-        width: '90%',
+        width: '100%',
         borderRadius: 15,
         marginBottom: 5,
         marginTop: 5,
@@ -426,7 +454,7 @@ const styles = StyleSheet.create({
         flexWrap: 'nowrap'
     },
     tipoTagView: {
-        width: '100%',
+        width: '90%',
         borderRadius: 15,
         marginBottom: 5,
         marginTop: 5,
